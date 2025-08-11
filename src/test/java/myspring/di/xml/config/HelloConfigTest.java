@@ -22,8 +22,16 @@ public class HelloConfigTest {
 	
 	@Test
 	void hello전략32() {
+		// setName() 테스트
 		System.out.println(hello.sayHello());
+		
+		// sePrinter() 테스트
 		hello.print();
 		System.out.println(printer.toString());
+		
+		//setNames() 테스트
+		for(String name:hello.getNames()) {
+			System.out.println(name);
+		}
 	}
 }
