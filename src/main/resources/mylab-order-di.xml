@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  파일명: src/main/resources/mylab-order-di.xml
+  목적 : Spring 컨테이너가 관리할 Bean을 "XML만으로" 설정하고 DI를 수행
+  포인트:
+   - product1: setter 주입 예제 (<property>)
+   - product2: 생성자 주입 예제 (<constructor-arg>)
+   - shoppingCart: <list> + <ref>로 컬렉션 주입
+   - orderService: 다른 Bean(shoppingCart) 주입(ref)
+-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+         http://www.springframework.org/schema/beans
+         https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- ===================================================================== -->
+    <!-- product1 : setter injection                                           -->
+    <!-- - 동작: 기본 생성자 호출 후 setId/setName/setPrice 를 통해 값 주입     -->
+    <!-- - 주의: <property name="..."> 의 name 은 set메서드 이름과 정확히 매칭  -->
+    <!-- - 문자열 "150000"은 Spring의 타입 변환기로 double 필드에 변환/주입됨   -->
+    <!-- ===================================================================== -->
+    <bean id="product1" class="mylab.order.di.xml.Product">
+        <property name="id" value="P001"/>
+        <property name="name" value="노트북"/>
+        <property name="price" value="150000"/>
+    </bean>
+
+    <!-- ===================================================================== -->
+    <!-- product2 : constructor injection                                      -->
+    <!-- - 동작: (id, name, price) 시그니처에 맞춰 생성자 호출                  -->
+    <!-- - 순서: 아래 <constructor-arg> 순서대로 파라미터가 매핑됨               -->
+    <!-- - 타입: 문자열 "800000" → double 로 변환되어 주입                      -->
+    <!-- ===================================================================== -->
+    <bean id="product2" class="mylab.order.di.xml.Product">
+        <constructor-arg value="P002"/>
+        <constructor-arg value="스마트폰"/>
+        <constructor-arg value="800000"/>
+    </bean>
+
+    <!-- ===================================================================== -->
+    <!-- shoppingCart : 컬렉션(List<Product>) 주입                              -->
+    <!-- - 동작: setProducts(List<Product>) 호출                               -->
+    <!-- - <list> 안에 <ref bean="..."> 로 이미 정의된 Product 빈을 참조       -->
+    <!-- - 순서: 리스트에 넣은 순서가 그대로 유지됨 (테스트의 인덱스 검증과 일치) -->
+    <!-- ===================================================================== -->
+    <bean id="shoppingCart" class="mylab.order.di.xml.ShoppingCart">
+        <property name="products">
+            <list>
+                <ref bean="product1"/>
+                <ref bean="product2"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- ===================================================================== -->
+    <!-- orderService : 다른 Bean 주입(ref)                                     -->
+    <!-- - 동작: setShoppingCart(ShoppingCart) 호출                             -->
+    <!-- - 결과: orderService.calculateOrderTotal() 가 cart의 합계를 반환       -->
+    <!-- ===================================================================== -->
+    <bean id="orderService" class="mylab.order.di.xml.OrderService">
+        <property name="shoppingCart" ref="shoppingCart"/>
+    </bean>
+
+</beans>
